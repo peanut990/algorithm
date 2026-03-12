@@ -1,18 +1,18 @@
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.util.Scanner;
 import java.util.Stack;
 import java.util.StringTokenizer;
 
 public class Main {
     public static void main(String[] args) throws IOException {
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        int N = Integer.parseInt(br.readLine());
+        Scanner sc = new Scanner(System.in);
+
+        int N = Integer.parseInt(sc.nextLine());
         int[] A = new int[N];
         int[] F = new int[1_000_001];
         int[] result = new int[N];
 
-        StringTokenizer st = new StringTokenizer(br.readLine());
+        StringTokenizer st = new StringTokenizer(sc.nextLine());
         for (int i = 0; i < N; i++) {
             A[i] = Integer.parseInt(st.nextToken());
             F[A[i]]++;
@@ -53,7 +53,7 @@ public class Main {
             stack.push(tmp);
 
         }
-        
+
         StringBuilder sb = new StringBuilder();
         for (int i : result) {
             sb.append(i).append(' ');
