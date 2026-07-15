@@ -2,33 +2,23 @@ import java.util.*;
 
 class Solution {
     public int solution(int[][] targets) {
-        PriorityQueue<int[]> pq = new PriorityQueue<>((a,b)->{
-            return a[0] - b[0];
-        });
-        for(int[] t: targets){
-            pq.offer(t);
-        }
-        
+        Arrays.sort(targets, Comparator.comparingInt(target->target[0]));
         
         int answer = 1;
-        int minX = Integer.MAX_VALUE;
-        while(!pq.isEmpty()){
-            int[] poll = pq.poll();
-            if(poll[0] < minX){
-                minX = Math.min(minX, poll[1]);
-            }else{
+        int minEnd = targets[0][1];
+
+        for (int i = 1; i < targets.length; i++) {
+            int start = targets[i][0];
+            int end = targets[i][1];
+
+            if (start < minEnd) {
+                minEnd = Math.min(minEnd, end);
+            } else {
                 answer++;
-                minX = poll[1];
+                minEnd = end;
             }
+
         }
         return answer;
     }
 }
-
-/*
-
-------------------------
-   --         ----
-   -  -
- ------
-*/
