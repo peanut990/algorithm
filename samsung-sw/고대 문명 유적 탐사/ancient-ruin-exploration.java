@@ -1,6 +1,8 @@
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
 import java.util.StringTokenizer;
 
@@ -115,10 +117,13 @@ public class Main {
                 if (checkedMap[i][j] || rotatedMap[i][j] == 0) continue;
 
                 // 개수 탐색
-                int count = bfs(i, j, rotatedMap, checkedMap);
-                if (count >= 3) {
-                    removedCount += count;
-                    bfsForZero(i, j, rotatedMap);
+                List<int[]> locList = bfs(i, j, rotatedMap, checkedMap);
+                if (locList.size() >= 3) {
+                    removedCount += locList.size();
+                    
+                    for(int[] loc : locList){
+                        rotatedMap[loc[0]][loc[1]] = 0;
+                    }
                 }
                 //System.out.printf("startY: %d, startX: %d, count: %d \n",i,j,count);
             }
@@ -127,19 +132,19 @@ public class Main {
         return removedCount;
     }
 
-    public static void bfsForZero(int y, int x, int[][] map) {
+    public static List<int[]> bfs(int y, int x, int[][] map, boolean[][] checkedMap) {
         Queue<int[]> q = new LinkedList<>();
-        boolean[][] checkedMap = new boolean[MAP_SIZE][MAP_SIZE];
-
-        int pivotNum = map[y][x];
-
+        List<int[]> locList = new ArrayList<>();
         q.offer(new int[]{y, x});
         checkedMap[y][x] = true;
-        map[y][x] = 0;
+
+        int pivotNum = map[y][x];
 
         while (!q.isEmpty()) {
             int[] poll = q.poll();
 
+            locList.add(poll);
+            
             for (int d = 0; d < 4; d++) {
                 int nextY = poll[0] + dirY[d];
                 int nextX = poll[1] + dirX[d];
@@ -148,38 +153,11 @@ public class Main {
                 if (map[nextY][nextX] == pivotNum) {
                     q.offer(new int[]{nextY, nextX});
                     checkedMap[nextY][nextX] = true;
-                    map[nextY][nextX] = 0;
                 }
             }
         }
 
-    }
-
-    public static int bfs(int y, int x, int[][] map, boolean[][] checkedMap) {
-        Queue<int[]> q = new LinkedList<>();
-        q.offer(new int[]{y, x});
-        checkedMap[y][x] = true;
-
-        int pivotNum = map[y][x];
-        int count = 1;
-
-        while (!q.isEmpty()) {
-            int[] poll = q.poll();
-
-            for (int d = 0; d < 4; d++) {
-                int nextY = poll[0] + dirY[d];
-                int nextX = poll[1] + dirX[d];
-
-                if (!inRange(nextY, nextX) || checkedMap[nextY][nextX]) continue;
-                if (map[nextY][nextX] == pivotNum) {
-                    q.offer(new int[]{nextY, nextX});
-                    checkedMap[nextY][nextX] = true;
-                    count++;
-                }
-            }
-        }
-
-        return count;
+        return locList;
     }
 
     public static boolean inRange(int y, int x) {
