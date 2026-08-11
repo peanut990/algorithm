@@ -11,8 +11,6 @@ public class Main {
     static int[][] map = new int[MAP_SIZE][MAP_SIZE];
     static int[] printedNums;
 
-    static int searchedCount;
-
     static int[] dirY = {-1, 1, 0, 0}; // 상하좌우
     static int[] dirX = {0, 0, -1, 1};
 
@@ -44,19 +42,18 @@ public class Main {
             int maxCount = 0;
 
             int[][] maxMap = copyMap(map);
-            for (int d = 0; d < 3; d++) { // 90, 180, 270
+            for (int d = 1; d <= 3; d++) { // 90, 180, 270
                 for (int cx = 1; cx <= 3; cx++) {
                     for (int cy = 1; cy <= 3; cy++) {
-                        int[][] rotatedMap = copyMap(map);
-                        rotate(cy, cx, rotatedMap, d);
+                        int[][] rotatedMap = createRotatedMap(cy, cx, map, d);
 
 //                        System.out.printf("cy: %d, cx: %d, d:%d \n", cy, cx, d);
 //                        printMap(rotatedMap);
 
-                        int[][] searchedMap = search(rotatedMap);
-                        if (searchedCount > maxCount) {
-                            maxCount = searchedCount;
-                            maxMap = searchedMap;
+                        int removedCount = search(rotatedMap);
+                        if (removedCount > maxCount) {
+                            maxCount = removedCount;
+                            maxMap = rotatedMap;
                         }
 //                        System.out.printf("searchedCount: %d\n", searchedCount);
 
@@ -82,15 +79,15 @@ public class Main {
 //                printMap(map);
 
                 //3. 유물 연쇄 획득
-                map = search(map);
+                int removedCount = search(map);
 //                System.out.println("유물 연쇄 획득 후 ");
 //                printMap(map);
 
-                if (searchedCount <= 0) {
+                if (removedCount <= 0) {
                     break;
                 }
 
-                answer += searchedCount;
+                answer += removedCount;
             }
 
             System.out.print(answer + " ");
@@ -109,26 +106,25 @@ public class Main {
         return printedNumsIdx;
     }
 
-    public static int[][] search(int[][] rotatedMap) {
-        searchedCount = 0; // static
-        int[][] tmpMap = copyMap(rotatedMap);
+    public static int search(int[][] rotatedMap) {
         boolean[][] checkedMap = new boolean[MAP_SIZE][MAP_SIZE];
+        int removedCount = 0;
 
         for (int i = 0; i < MAP_SIZE; i++) {
             for (int j = 0; j < MAP_SIZE; j++) {
-                if (checkedMap[i][j] || tmpMap[i][j] == 0) continue;
+                if (checkedMap[i][j] || rotatedMap[i][j] == 0) continue;
 
                 // 개수 탐색
-                int count = bfs(i, j, tmpMap, checkedMap);
+                int count = bfs(i, j, rotatedMap, checkedMap);
                 if (count >= 3) {
-                    searchedCount += count;
-                    bfsForZero(i, j, tmpMap);
+                    removedCount += count;
+                    bfsForZero(i, j, rotatedMap);
                 }
                 //System.out.printf("startY: %d, startX: %d, count: %d \n",i,j,count);
             }
         }
 
-        return tmpMap;
+        return removedCount;
     }
 
     public static void bfsForZero(int y, int x, int[][] map) {
@@ -201,42 +197,19 @@ public class Main {
         return copiedMap;
     }
 
-    public static void rotate(int cy, int cx, int[][] map, int d) {
-        int[] tmp = new int[8];
-        int idx = 0;
-        final int size = 2;
+    public static int[][] createRotatedMap(int cy, int cx, int[][] map, int rotationCount) {
+        int[][] result = copyMap(map);
 
-        for (int i = 0; i < size; i++) {
-            tmp[idx++] = map[cy - 1][cx - 1 + i];
-        }
-        for (int i = 0; i < size; i++) {
-            tmp[idx++] = map[cy - 1 + i][cx + 1];
-        }
-        for (int i = 0; i < size; i++) {
-            tmp[idx++] = map[cy + 1][cx + 1 - i];
-        }
-        for (int i = 0; i < size; i++) {
-            tmp[idx++] = map[cy + 1 - i][cx - 1];
+        for (int r = 0; r < rotationCount; r++) {
+            int[][] prev = copyMap(result);
+            for (int y = -1; y <= 1; y++) {
+                for (int x = -1; x <= 1; x++) {
+                    result[cy + x][cx - y] = prev[cy + y][cx + x];
+                }
+            }
         }
 
-        // 회전 인덱스 설정
-        int stIdx = 6 - (2 * d);
-        for (int i = 0; i < size; i++) {
-            map[cy - 1][cx - 1 + i] = tmp[stIdx];
-            stIdx = (stIdx + 1) % 8;
-        }
-        for (int i = 0; i < size; i++) {
-            map[cy - 1 + i][cx + 1] = tmp[stIdx];
-            stIdx = (stIdx + 1) % 8;
-        }
-        for (int i = 0; i < size; i++) {
-            map[cy + 1][cx + 1 - i] = tmp[stIdx];
-            stIdx = (stIdx + 1) % 8;
-        }
-        for (int i = 0; i < size; i++) {
-            map[cy + 1 - i][cx - 1] = tmp[stIdx];
-            stIdx = (stIdx + 1) % 8;
-        }
+        return result;
     }
 
     public static void printMap(int[][] map) {
@@ -264,5 +237,7 @@ while:
 2. 조각 생성
 3. 유물 연쇄 획득
 
-
+(-1, -1) (-1,0) (-1,1)
+(0, -1)
+(1, -1)
 */
