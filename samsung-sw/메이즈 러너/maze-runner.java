@@ -11,16 +11,32 @@ public class Main {
 
     public static int[] dirY = {-1, 1, 0, 0};// 상,하,좌,우
     public static int[] dirX = {0, 0, -1, 1};
-
-    public static int[] otherDirY = {-1, -1, 1, 1}; // 좌상, 우상, 좌하, 우하
-    public static int[] otherDirX = {-1, 1, -1, 1};
-
     public static final int EXIT = 100;
 
     public static int moveCount = 0;
     public static int outCount = 0;
 
     public static void main(String[] args) throws Exception {
+        setMap();
+
+        // 로직 시작
+        for (int k = 0; k < K; k++) { // k값 수정 필요
+            //1. 참자가 이동
+            map = movePeople();
+
+            if (outCount == M) break;
+
+            //2. 미로 회전
+            rotateMap();
+        }
+
+        System.out.println(moveCount);
+        int[] exitPos = getExitPos(map);
+        System.out.println((exitPos[0] + 1) + " " + (exitPos[1] + 1));
+
+    }
+
+    public static void setMap() throws Exception {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         StringTokenizer st = new StringTokenizer(br.readLine());
 
@@ -50,28 +66,9 @@ public class Main {
         int eY = Integer.parseInt(st.nextToken()) - 1;
         int eX = Integer.parseInt(st.nextToken()) - 1;
         map[eY][eX] = EXIT;
-
-        // 로직 시작
-        for (int k = 0; k < K; k++) { // k값 수정 필요
-            //1. 참자가 이동
-            map = movePeople();
-
-
-            if (outCount == M) break;
-
-            //2. 미로 회전
-            rotateMap();
-        }
-
-        System.out.println(moveCount);
-        int[] exitPos = getExitPos(map);
-        System.out.println((exitPos[0]+1) + " " + (exitPos[1]+1));
-
     }
 
     public static void rotateMap() {
-        int[] exitPos = getExitPos(map);
-
         int[] searchedRacPosInfo = searchRacPos();
 
         //회전
@@ -139,17 +136,6 @@ public class Main {
         }
 
         return foundPeople && foundExit;
-    }
-
-    public static boolean findPeople(int minY, int minX, int maxY, int maxX) {
-        for (int y = minY; y <= maxY; y++) {
-            for (int x = minX; x <= maxX; x++) {
-                if (isPeople(map[y][x])) { // 사람 발견
-                    return true;
-                }
-            }
-        }
-        return false;
     }
 
     public static int[][] movePeople() {
@@ -245,24 +231,5 @@ public class Main {
         }
         return null;
     }
-
-    public static int[][] copyMap(int[][] map) {
-        int[][] tmpMap = new int[N][N];
-        for (int i = 0; i < N; i++) {
-            for (int j = 0; j < N; j++) {
-                tmpMap[i][j] = map[i][j];
-            }
-        }
-        return tmpMap;
-    }
-
-    public static void printMap(int[][] map) {
-        for (int i = 0; i < map.length; i++) {
-            for (int j = 0; j < map[0].length; j++) {
-                System.out.printf("%3d ", map[i][j]);
-            }
-            System.out.println();
-        }
-        System.out.println();
-    }
 }
+
