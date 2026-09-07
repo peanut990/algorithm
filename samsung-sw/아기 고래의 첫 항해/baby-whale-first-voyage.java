@@ -1,5 +1,3 @@
-//4:25~ 6:26 6:42~
-
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.ArrayDeque;
@@ -23,15 +21,14 @@ public class Main {
     static int[] dirY = {-1, 1, 0, 0}; //상,하,좌,우
     static int[] dirX = {0, 0, -1, 1};
 
-    static int[] moveFarDirY = {0, 1, 0, -1}; //좌,하,우,상
-    static int[] moveFarDirX = {-1, 0, 1, 0};
-
     static int[][] adjDir = {
             {0, 2, 3, 1},
             {1, 3, 2, 0},
             {2, 1, 0, 3},
             {3, 0, 1, 2}
     };
+
+    static int[] moveFarDir = {2,1,3,0};
 
     public static void main(String[] args) throws Exception {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
@@ -78,6 +75,7 @@ public class Main {
         boolean[][] visited = new boolean[N][N];
 
         List<int[]> seaList = new ArrayList<>();
+        int[][] dirMap = new int[N][N];
 
         q.offer(new int[]{whaleY, whaleX});
         visited[whaleY][whaleX] = true;
@@ -88,10 +86,12 @@ public class Main {
             int size = q.size();
             for (int s = 0; s < size; s++) {
                 int[] poll = q.poll();
+                
+                for (int d = 0; d < moveFarDir.length; d++) {
+                    int dir = moveFarDir[d];
 
-                for (int d = 0; d < dirY.length; d++) {
-                    int nextY = poll[0] + dirY[d];
-                    int nextX = poll[1] + dirX[d];
+                    int nextY = poll[0] + dirY[dir];
+                    int nextX = poll[1] + dirX[dir];
 
                     // 범위 밖, 이미 방문, 암초인 경우
                     if (!inRange(nextY, nextX) || visited[nextY][nextX] || map[nextY][nextX] == 1) continue;
@@ -102,6 +102,7 @@ public class Main {
                     if (visitedMap[nextY][nextX] == 0) { // 처음 방문
                         seaList.add(new int[]{nextY, nextX});
                         found = true;
+                        dirMap[nextY][nextX] = dir;
                     }
                 }
             }
@@ -120,52 +121,16 @@ public class Main {
         // 이동
         int[] nextLoc = seaList.get(0);
 
-        moveToFar(nextLoc[0], nextLoc[1]);
-
-        return true;
-    }
-
-    public static void moveToFar(int goalY, int goalX) {
-        Queue<int[]> q = new ArrayDeque();
-        boolean[][] visited = new boolean[N][N];
-        int goalDir = -1;
-
-        q.offer(new int[]{whaleY, whaleX});
-        visited[whaleY][whaleX] = true;
-
-        boolean found = false;
-
-        while (!q.isEmpty()) {
-            int[] poll = q.poll();
-
-            for (int d = 0; d < moveFarDirY.length; d++) {
-                int nextY = poll[0] + moveFarDirY[d];
-                int nextX = poll[1] + moveFarDirX[d];
-
-                // 범위 밖, 이미 방문, 암초인 경우
-                if (!inRange(nextY, nextX) || visited[nextY][nextX] || map[nextY][nextX] == 1) continue;
-
-                q.offer(new int[]{nextY, nextX});
-                visited[nextY][nextX] = true;
-
-                if (nextY == goalY && nextX == goalX) {
-                    found = true;
-                    goalDir = d;
-                    break;
-                }
-            }
-
-            if (found) break;
-        }
-
         // 이동
-        whaleY = goalY;
-        whaleX = goalX;
-        whaleDir = changeDir(goalDir);
+        whaleY = nextLoc[0];
+        whaleX = nextLoc[1];
+        whaleDir = dirMap[whaleY][whaleX];
 
         visitedMap[whaleY][whaleX] = moveCount++;
 
         System.out.println((whaleY + 1) + " " + (whaleX + 1));
+
+        return true;
     }
 
     public static boolean moveAdj() {
@@ -203,18 +168,5 @@ public class Main {
     public static boolean inRange(int y, int x) {
         return y >= 0 && y < N && x >= 0 && x < N;
     }
-    
-    public static int changeDir(int dir){
-        switch (dir){
-            case 0:
-                return 2;
-            case 1:
-                return 1;
-            case 2:
-                return 3;
-            case 3:
-                return 0;
-        }
-        return -1;
-    }
+
 }
